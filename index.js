@@ -49,7 +49,7 @@ express()
     if (req.query.lat && req.query.long) {
       keysNearest = geolib.findNearest({latitude: req.query.lat, longitude: req.query.long}, cordMaps, 1, 5).map(row => row.key);
     }
-    const resp = data['stations'].filter(row => keysNearest.includes(row.stationID)).map(row => ({
+    const resp = data['stations'].slice(5).filter(row => keysNearest.includes(row.stationID)).map(row => ({
       nameTH: row.nameTH,
       nameEN: row.nameEN,
       areaTH: row.areaTH,
