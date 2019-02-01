@@ -1,5 +1,6 @@
 const express = require('express')
 const path = require('path')
+const request = require('request')
 const PORT = process.env.PORT || 5000
 const Client = require('node-rest-client').Client
 const client = new Client()
@@ -7,19 +8,21 @@ const NodeCache = require('node-cache')
 const cache = new NodeCache({ stdTTL: 60*60*1 })
 const keyData = 'pm25-data'
 const pm25API = 'http://air4thai.pcd.go.th/forappV2/getAQI_JSON.php'
+const historyUrl = 'http://air4thai.pcd.go.th/webV2/chart/myGraphMini.php?param=AQI&lang=TH&stationID='
 const geolib = require('geolib')
-const icons = [
-  'http://air4thai.pcd.go.th/webV2/image/ball_0.png',
-  'http://air4thai.pcd.go.th/webV2/image/ball_1.png',
-  'http://air4thai.pcd.go.th/webV2/image/ball_2.png',
-  'http://air4thai.pcd.go.th/webV2/image/ball_3.png',
-  'http://air4thai.pcd.go.th/webV2/image/ball_4.png'
-]
+const icon = 'http://air4thai.pcd.go.th/webV2/image/ball_%NUMBER%.png'
 
 express()
   .use(express.static(path.join(__dirname, 'public')))
   .set('views', path.join(__dirname, 'views'))
   .set('view engine', 'ejs')
+  .get('/history/:station', (req, res) => {
+    request(historyUrl + req.params.station, function (error, response, body) {
+      return res.status(200)
+      .type('text/html')
+      .send(body)
+    })
+  })
   .get('/api', async (req, res) => {
     data = await (new Promise(resolve => {
       const cacheData = cache.get(keyData)
@@ -56,8 +59,9 @@ express()
       updated: row.AQILast.date + ' ' + row.AQILast.time,
       aqi: {
         ...row.AQILast.AQI,
-        icon: icons[row.AQILast.AQI.color_id]
-      }
+        icon: icon.replace('%NUMBER%', row.AQILast.AQI.color_id)
+      },
+      historyUrl: req.hostname+'/history/'+row.stationID
     }))
 
     return res.status(200)
