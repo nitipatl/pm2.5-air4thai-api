@@ -59,7 +59,7 @@ express()
       updated: row.AQILast.date + ' ' + row.AQILast.time,
       aqi: {
         ...row.AQILast.AQI,
-        icon: 'https://'+req.hostname+'/icons/'+row.AQILast.AQI.color_id
+        icon: 'https://'+req.hostname+'/icons/'+row.AQILast.AQI.color_id+'.jpg'
       },
       historyUrl: 'https://'+req.hostname+'/history/'+row.stationID
     }))
