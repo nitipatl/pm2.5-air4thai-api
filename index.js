@@ -46,8 +46,13 @@ express()
     
     let keysNearest = data['stations'].map(row => row.stationID)
 
+    let distancePin = []
     if (req.query.lat && req.query.long) {
-      keysNearest = geolib.findNearest({latitude: req.query.lat, longitude: req.query.long}, cordMaps, 1, 5).map(row => row.key);
+      const pins = geolib.findNearest({latitude: req.query.lat, longitude: req.query.long}, cordMaps, 1, 5)
+      pins.forEach(row => {
+        distancePin[row.key] = row.distance
+      })
+      keysNearest = pins.map(row => row.key);
     }
     const resp = data['stations'].filter(row => keysNearest.includes(row.stationID)).map(row => ({
       nameTH: row.nameTH,
@@ -61,8 +66,9 @@ express()
         ...row.AQILast.AQI,
         icon: 'https://'+req.hostname+'/icons/'+row.AQILast.AQI.color_id+'.jpg'
       },
-      historyUrl: 'https://'+req.hostname+'/history/'+row.stationID
-    })).slice(0, 5)
+      historyUrl: 'https://'+req.hostname+'/history/'+row.stationID,
+      distance: distancePin[row.stationID] ? distancePin[row.stationID] : 0
+    })).sort((a, b) => (a.distance - b.distance)).slice(0, 5)
 
     return res.status(200)
       .type('application/json')
