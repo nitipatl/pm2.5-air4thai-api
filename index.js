@@ -61,7 +61,7 @@ express()
         ...row.AQILast.AQI,
         icon: icon.replace('%NUMBER%', row.AQILast.AQI.color_id)
       },
-      historyUrl: req.hostname+'/history/'+row.stationID
+      historyUrl: 'https://'+req.hostname+'/history/'+row.stationID
     }))
 
     return res.status(200)
