@@ -49,7 +49,7 @@ express()
     if (req.query.lat && req.query.long) {
       keysNearest = geolib.findNearest({latitude: req.query.lat, longitude: req.query.long}, cordMaps, 1, 5).map(row => row.key);
     }
-    const resp = data['stations'].slice(0, 5).filter(row => keysNearest.includes(row.stationID)).map(row => ({
+    const resp = data['stations'].filter(row => keysNearest.includes(row.stationID)).map(row => ({
       nameTH: row.nameTH,
       nameEN: row.nameEN,
       areaTH: row.areaTH,
@@ -62,7 +62,7 @@ express()
         icon: 'https://'+req.hostname+'/icons/'+row.AQILast.AQI.color_id+'.jpg'
       },
       historyUrl: 'https://'+req.hostname+'/history/'+row.stationID
-    }))
+    })).slice(0, 5)
 
     return res.status(200)
       .type('application/json')
